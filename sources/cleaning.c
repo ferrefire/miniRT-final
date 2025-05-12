@@ -6,7 +6,7 @@
 /*   By: ferre <ferre@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/02/19 17:59:01 by ferre         #+#    #+#                 */
-/*   Updated: 2025/05/12 04:02:02 by ferre         ########   odam.nl         */
+/*   Updated: 2025/05/12 19:01:11 by ferre         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,17 +19,17 @@
 #include <stdio.h>
 #include <unistd.h>
 
-void	cleanShapes(t_shapes *shapes)
+void	clean_shapes(t_shapes *shapes)
 {
-    if (shapes->spheres)
-      free_memory(shapes->spheres);
-    if (shapes->planes)
-      free_memory(shapes->planes);
-    if (shapes->cylinders)
-      free_memory(shapes->cylinders);
+	if (shapes->spheres)
+		free_memory(shapes->spheres);
+	if (shapes->planes)
+		free_memory(shapes->planes);
+	if (shapes->cylinders)
+		free_memory(shapes->cylinders);
 }
 
-void	cleanData(t_data *data)
+void	clean_data(t_data *data)
 {
 	if (data != NULL)
 	{
@@ -40,13 +40,13 @@ void	cleanData(t_data *data)
 			close(data->open_fd);
 			get_next_line(data->open_fd);
 		}
-		cleanMLX(&data->mlx_data);
-		cleanShapes(&data->scene_data.shapes);
+		clean_mlx(&data->mlx_data);
+		clean_shapes(&data->scene_data.shapes);
 		clear(&data);
 	}
 }
 
-void	cleanMLX(t_mlx_data *data)
+void	clean_mlx(t_mlx_data *data)
 {
 	if (data->mlx)
 	{
@@ -81,9 +81,9 @@ void	free_tokens(char **tokens)
 {
 	int	i;
 
-  	i = 0;
+	i = 0;
 	if (!tokens)
-		return;
+		return ;
 	while (tokens[i] != NULL)
 	{
 		free(tokens[i]);

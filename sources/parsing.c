@@ -6,7 +6,7 @@
 /*   By: ferre <ferre@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/03/11 14:11:00 by ferre         #+#    #+#                 */
-/*   Updated: 2025/05/12 03:44:41 by ferre         ########   odam.nl         */
+/*   Updated: 2025/05/12 21:29:45 by ferre         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void	parse_file(int fd, t_data *data)
 		{
 			free(line);
 			line = get_next_line(fd);
-			continue;
+			continue ;
 		}
 		parse_line(line, data);
 		free(line);
@@ -67,28 +67,29 @@ void	parse_file(int fd, t_data *data)
 
 void	parse_line(char *line, t_data *data)
 {
-	char	**tokens;
+	char	**t;
 	int		token_count;
 	int		len;
 
-	tokens = ft_split(line, ' ');
-	if (tokens == NULL || tokens[0] == NULL)
-		return;
+	t = ft_split(line, ' ');
+	if (t == NULL || t[0] == NULL)
+		return ;
 	token_count = 0;
-	while (tokens && tokens[token_count])
+	while (t && t[token_count])
 		token_count++;
-	len = ft_strlen(tokens[0]);
+	len = ft_strlen(t[0]);
 	data->current_line = line;
-	if (len == 1 && ft_strncmp(tokens[0], "C", 1) == 0)
-		parse_camera(tokens, token_count, data);
-	else if (len == 1 && ft_strncmp(tokens[0], "L", 1) == 0)
-		parse_light(tokens, token_count, data);
-	else if (len == 1 && ft_strncmp(tokens[0], "A", 1) == 0)
-		parse_ambient(tokens, token_count, data);
-	else if (len == 2 && (ft_strncmp(tokens[0], "sp", 2) == 0 || ft_strncmp(tokens[0], "pl", 2) == 0 || ft_strncmp(tokens[0], "cy", 2) == 0))
-		parse_shape(tokens, token_count, &data->scene_data.shapes, data);
+	if (len == 1 && ft_strncmp(t[0], "C", 1) == 0)
+		parse_camera(t, token_count, data);
+	else if (len == 1 && ft_strncmp(t[0], "L", 1) == 0)
+		parse_light(t, token_count, data);
+	else if (len == 1 && ft_strncmp(t[0], "A", 1) == 0)
+		parse_ambient(t, token_count, data);
+	else if (len == 2 && (ft_strncmp(t[0], "sp", 2) == 0 || ft_strncmp(t[0]
+				, "pl", 2) == 0 || ft_strncmp(t[0], "cy", 2) == 0))
+		parse_shape(t, token_count, &data->scene_data.shapes, data);
 	else
-		quit_tokens(tokens, "Invalid element type.\n", data);
-	free_tokens(tokens);
+		quit_tokens(t, "Invalid element type.\n", data);
+	free_tokens(t);
 	data->current_line = NULL;
 }

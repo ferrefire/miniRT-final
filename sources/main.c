@@ -6,7 +6,7 @@
 /*   By: ferre <ferre@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/02/19 17:24:26 by ferre         #+#    #+#                 */
-/*   Updated: 2025/05/12 03:42:27 by ferre         ########   odam.nl         */
+/*   Updated: 2025/05/12 19:46:40 by ferre         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void	quit(const char *msg, t_data *data)
 	printf("Error\n");
 	if (msg != NULL)
 		printf("%s", msg);
-	cleanData(data);
+	clean_data(data);
 	exit(EXIT_FAILURE);
 }
 
@@ -42,13 +42,13 @@ int	main(int argc, char *argv[])
 {
 	t_data	*data;
 
-  	if (argc != 2)
+	if (argc != 2)
 		quit("Invalid argument count.\n", NULL);
-  	data = initiateData();
-  	handle_file(argv[1], data);
-	setHooks(data);
-	mlx_loop_hook(data->mlx_data.mlx, renderImage, data);
+	data = initiate_data();
+	handle_file(argv[1], data);
+	set_hooks(data);
+	mlx_loop_hook(data->mlx_data.mlx, render_image, data);
 	mlx_loop(data->mlx_data.mlx);
-	cleanData(data);
+	clean_data(data);
 	exit(EXIT_SUCCESS);
 }

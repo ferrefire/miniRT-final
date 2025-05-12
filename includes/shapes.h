@@ -6,28 +6,28 @@
 /*   By: ferre <ferre@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/03/11 14:02:36 by ferre         #+#    #+#                 */
-/*   Updated: 2025/05/12 04:05:58 by ferre         ########   odam.nl         */
+/*   Updated: 2025/05/12 22:19:38 by ferre         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SHAPES_H
-#define SHAPES_H
+# define SHAPES_H
 
-#include "minirt.h"
-#include "vector.h"
+# include "minirt.h"
+# include "vector.h"
 
-#define PI 3.141592654
+# define PI 3.141592654
 
-typedef struct	s_sphere
+typedef struct s_sphere
 {
 	int		type;
 	t_vec	color;
 	t_vec	center;
 	float	radius;
-	float	radiusSquared;
+	float	radius_squared;
 }				t_sphere;
 
-typedef struct	s_plane
+typedef struct s_plane
 {
 	int		type;
 	t_vec	color;
@@ -35,7 +35,7 @@ typedef struct	s_plane
 	t_vec	normal;
 }				t_plane;
 
-typedef struct	s_cylinder
+typedef struct s_cylinder
 {
 	int		type;
 	t_vec	color;
@@ -45,16 +45,14 @@ typedef struct	s_cylinder
 	float	height;
 }				t_cylinder;
 
-typedef struct	s_shapes
+typedef struct s_shapes
 {
 	t_sphere	*spheres;
-	int			sphereCount;
-
+	int			sphere_count;
 	t_plane		*planes;
-	int			planeCount;
-
+	int			plane_count;
 	t_cylinder	*cylinders;
-	int			cylinderCount;
+	int			cylinder_count;
 }				t_shapes;
 
 t_sphere	*add_sphere(char **tokens, t_shapes *shapes, void *data);

@@ -6,7 +6,7 @@
 /*   By: ferre <ferre@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/03/10 22:49:31 by ferre         #+#    #+#                 */
-/*   Updated: 2025/05/12 04:07:13 by ferre         ########   odam.nl         */
+/*   Updated: 2025/05/12 22:13:48 by ferre         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,176 +17,110 @@
 
 #include <math.h>
 
-t_hit	intersectingSphere(t_vec point, t_sphere sphere)
+t_hit	intersecting_sphere(t_vec point, t_sphere sphere)
 {
-	t_hit	hitInfo;
-	float	sphereDistance;
+	t_hit	hit;
+	float	sphere_distance;
 
-	hitInfo.intersected = 0;
-	sphereDistance = distance(point, sphere.center) - sphere.radius;
-	if (sphereDistance <= 0.0) 
+	hit.intersected = 0;
+	sphere_distance = distance(point, sphere.center) - sphere.radius;
+	if (sphere_distance <= 0.0)
 	{
-		hitInfo.intersected = 1;
-		hitInfo.position = sphere.center;
-		hitInfo.normal = normalize(sub(point, sphere.center));
-		hitInfo.color = sphere.color;
+		hit.intersected = 1;
+		hit.position = sphere.center;
+		hit.normal = normalize(sub(point, sphere.center));
+		hit.color = sphere.color;
 	}
-	hitInfo.distance = fabs(sphereDistance);
-	return (hitInfo);
+	hit.distance = fabs(sphere_distance);
+	return (hit);
 }
 
-t_hit	intersectingPlane(t_vec point, t_plane plane)
+t_hit	intersecting_plane(t_vec point, t_plane plane)
 {
-	t_hit	hitInfo;
+	t_hit	hit;
 	float	d;
 	float	side;
 
-	hitInfo.intersected = 0;
-	d = -(plane.normal.x * plane.position.x + plane.normal.y * plane.position.y + plane.normal.z * plane.position.z);
-	side = plane.normal.x * point.x + plane.normal.y * point.y + plane.normal.z * point.z + d;
+	hit.intersected = 0;
+	d = -(plane.normal.x * plane.position.x + plane.normal.y
+			* plane.position.y + plane.normal.z * plane.position.z);
+	side = plane.normal.x * point.x + plane.normal.y * point.y
+		+ plane.normal.z * point.z + d;
 	if (side <= 0.0)
 	{
-		hitInfo.intersected = 1;
-		hitInfo.position = plane.position;
-		hitInfo.normal = plane.normal;
-		hitInfo.color = plane.color;
+		hit.intersected = 1;
+		hit.position = plane.position;
+		hit.normal = plane.normal;
+		hit.color = plane.color;
 	}
-	hitInfo.distance = fabs(side);
-	return (hitInfo);
+	hit.distance = fabs(side);
+	return (hit);
 }
 
-t_hit	intersectingCylinder(t_vec point, t_cylinder cylinder)
+t_hit	intersecting_cylinder(t_vec point, t_cylinder cylinder)
 {
-	t_hit	hitInfo;
-	t_vec	baseVec;
-	t_vec	axisVec;
-	t_vec	axisPoint;
-	float	t;
-	float	cylinderDistance;
+	t_hit			hit;
+	t_cylinder_data	cd;
+	float			cy_dis;
 
-	hitInfo.intersected = 0;
-	baseVec = sub(point, cylinder.position);
-	t = dot(baseVec, cylinder.axis);
-	axisVec = mult(cylinder.axis, clamp(t, cylinder.height * -0.5, cylinder.height * 0.5));
-	axisPoint = add(cylinder.position, axisVec);
-	cylinderDistance = distance(point, axisPoint) - cylinder.radius;
-	if (cylinderDistance <= 0.0 && t >= cylinder.height * -0.5 && t <= cylinder.height * 0.5)
+	hit.intersected = 0;
+	cd.base_vec = sub(point, cylinder.position);
+	cd.t = dot(cd.base_vec, cylinder.axis);
+	cd.axis_vec = mult(cylinder.axis, clamp(cd.t, cylinder.height
+				* -0.5, cylinder.height * 0.5));
+	cd.axis_point = add(cylinder.position, cd.axis_vec);
+	cy_dis = distance(point, cd.axis_point) - cylinder.radius;
+	if (cy_dis <= 0.0 && cd.t >= cylinder.height
+		* -0.5 && cd.t <= cylinder.height * 0.5)
 	{
-		hitInfo.intersected = 1;
-		hitInfo.position = cylinder.position;
-		hitInfo.normal = normalize(sub(point, axisPoint));
-		hitInfo.color = cylinder.color;
+		hit.intersected = 1;
+		hit.position = cylinder.position;
+		hit.normal = normalize(sub(point, cd.axis_point));
+		hit.color = cylinder.color;
 	}
-	hitInfo.distance = fabs(cylinderDistance);
-	return (hitInfo);
+	hit.distance = fabs(cy_dis);
+	return (hit);
 }
 
-float	closestSphere(t_vec point, t_scene_data scene)
+t_hit	check_intersections(t_ray ray, t_scene_data scene)
 {
-	t_vec	closestSphere;
-	float	closestDistance;
-	float	currentDistance;
-	float	closestRadius;
-	int		i;
+	t_intersect_data	id;
+
+	id = get_intersection(1, scene.shapes.plane_count, ray, scene);
+	if (id.hit.intersected)
+		return (id.hit);
+	id = get_intersection(2, scene.shapes.sphere_count, ray, scene);
+	if (id.hit.intersected)
+		return (id.hit);
+	id = get_intersection(3, scene.shapes.cylinder_count, ray, scene);
+	if (id.hit.intersected)
+		return (id.hit);
+	id.hit.intersected = 0;
+	id.hit.distance = id.closest;
+	return (id.hit);
+}
+
+t_intersect_data	get_intersection(int type, int count,
+	t_ray ray, t_scene_data scene)
+{
+	t_intersect_data	id;
+	int					i;
 
 	i = 0;
-	closestDistance = 10000.0;
-	while (i < scene.shapes.sphereCount)
+	while (i < count)
 	{
-		currentDistance = distanceSquared(point, scene.shapes.spheres[i].center) - 
-			(scene.shapes.spheres[i].radius * scene.shapes.spheres[i].radius);
-		if (currentDistance < closestDistance)
-		{
-			closestDistance = currentDistance;
-			closestSphere = scene.shapes.spheres[i].center;
-			closestRadius = scene.shapes.spheres[i].radius;
-		}
+		if (type == 1)
+			id.hit = intersecting_plane(ray.position, scene.shapes.planes[i]);
+		else if (type == 2)
+			id.hit = intersecting_sphere(ray.position, scene.shapes.spheres[i]);
+		else if (type == 3)
+			id.hit = intersecting_cylinder(ray.position,
+					scene.shapes.cylinders[i]);
+		if (id.hit.intersected)
+			return (id);
+		if (id.hit.distance < id.closest)
+			id.closest = id.hit.distance;
 		i++;
 	}
-	if (closestDistance < 10000.0)
-		return (distance(point, closestSphere) - closestRadius);
-	return (closestDistance);
-}
-
-float	closestCylinder(t_vec point, t_scene_data scene)
-{
-	t_vec	closestCylinder;
-	float	closestDistance;
-	float	currentDistance;
-	float	closestRadius;
-	t_vec	baseVec;
-	t_vec	axisVec;
-	t_vec	axisPoint;
-	float	t;
-	int		i;
-
-	i = 0;
-	closestDistance = 10000.0;
-	while (i < scene.shapes.cylinderCount)
-	{
-		baseVec = sub(point, scene.shapes.cylinders[i].position);
-		t = dot(baseVec, scene.shapes.cylinders[i].axis);
-		axisVec = mult(scene.shapes.cylinders[i].axis, t);
-		axisPoint = add(scene.shapes.cylinders[i].position, axisVec);
-		currentDistance = distanceSquared(point, axisPoint) -
-			(scene.shapes.cylinders[i].radius * scene.shapes.cylinders[i].radius);
-		if (currentDistance < closestDistance)
-		{
-			closestDistance = currentDistance;
-			closestCylinder = axisPoint;
-			closestRadius = scene.shapes.cylinders[i].radius;
-		}
-		i++;
-	}
-	if (closestDistance < 10000.0)
-		return (distance(point, closestCylinder) - closestRadius);
-	return (closestDistance);
-}
-
-float	closestPlane(t_vec point, t_scene_data scene)
-{
-	float	closestDistance;
-	float	currentDistance;
-	float	d;
-	float	side;
-	int		i;
-
-	i = 0;
-	closestDistance = 10000.0;
-	while (i < scene.shapes.planeCount)
-	{
-		d = -(scene.shapes.planes[i].normal.x * scene.shapes.planes[i].position.x + 
-			scene.shapes.planes[i].normal.y * scene.shapes.planes[i].position.y + 
-			scene.shapes.planes[i].normal.z * scene.shapes.planes[i].position.z);
-		side = scene.shapes.planes[i].normal.x * point.x + scene.shapes.planes[i].normal.y * 
-			point.y + scene.shapes.planes[i].normal.z * point.z + d;
-		currentDistance = fabs(side);
-		if (currentDistance < closestDistance)
-		{
-			closestDistance = currentDistance;
-		}
-		i++;
-	}
-	return (closestDistance);
-}
-
-float	closestShape(t_vec point, t_scene_data scene)
-{
-	float	nearestPlane;
-	float	nearestSphere;
-	float	nearestCylinder;
-	float	smallestDistance;
-
-	smallestDistance = 0.01;
-	nearestPlane = closestPlane(point, scene);
-	if (nearestPlane <= smallestDistance) return (nearestPlane);
-	nearestSphere = closestSphere(point, scene);
-	if (nearestSphere <= smallestDistance) return (nearestSphere);
-	nearestCylinder = closestCylinder(point, scene);
-	if (nearestPlane < nearestSphere && nearestPlane < nearestCylinder)
-		return (nearestPlane);
-	else if (nearestSphere < nearestCylinder)
-		return (nearestSphere);
-	else
-		return (nearestCylinder);
+	return (id);
 }
