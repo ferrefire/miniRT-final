@@ -6,7 +6,7 @@
 /*   By: ferre <ferre@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/03/10 22:49:31 by ferre         #+#    #+#                 */
-/*   Updated: 2025/05/12 22:13:48 by ferre         ########   odam.nl         */
+/*   Updated: 2025/05/12 22:34:56 by ferre         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,37 +85,43 @@ t_hit	intersecting_cylinder(t_vec point, t_cylinder cylinder)
 t_hit	check_intersections(t_ray ray, t_scene_data scene)
 {
 	t_intersect_data	id;
+	float				closest;
 
 	id = get_intersection(1, scene.shapes.plane_count, ray, scene);
 	if (id.hit.intersected)
 		return (id.hit);
+	closest = id.closest;
 	id = get_intersection(2, scene.shapes.sphere_count, ray, scene);
 	if (id.hit.intersected)
 		return (id.hit);
+	closest = fmin(closest, id.closest);
 	id = get_intersection(3, scene.shapes.cylinder_count, ray, scene);
 	if (id.hit.intersected)
 		return (id.hit);
+	closest = fmin(closest, id.closest);
 	id.hit.intersected = 0;
-	id.hit.distance = id.closest;
+	id.hit.distance = closest;
 	return (id.hit);
 }
 
 t_intersect_data	get_intersection(int type, int count,
-	t_ray ray, t_scene_data scene)
+	t_ray ray, t_scene_data sd)
 {
 	t_intersect_data	id;
 	int					i;
 
 	i = 0;
+	id.closest = 10000.0;
+	id.hit.intersected = 0;
 	while (i < count)
 	{
 		if (type == 1)
-			id.hit = intersecting_plane(ray.position, scene.shapes.planes[i]);
+			id.hit = intersecting_plane(ray.position, sd.shapes.planes[i]);
 		else if (type == 2)
-			id.hit = intersecting_sphere(ray.position, scene.shapes.spheres[i]);
+			id.hit = intersecting_sphere(ray.position, sd.shapes.spheres[i]);
 		else if (type == 3)
 			id.hit = intersecting_cylinder(ray.position,
-					scene.shapes.cylinders[i]);
+					sd.shapes.cylinders[i]);
 		if (id.hit.intersected)
 			return (id);
 		if (id.hit.distance < id.closest)
