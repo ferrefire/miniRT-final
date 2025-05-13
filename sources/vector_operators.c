@@ -6,7 +6,7 @@
 /*   By: ferre <ferre@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/05/12 22:10:09 by ferre         #+#    #+#                 */
-/*   Updated: 2025/05/12 22:10:45 by ferre         ########   odam.nl         */
+/*   Updated: 2025/05/13 16:27:27 by ferre         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,28 +14,6 @@
 #include "vector.h"
 #include "math.h"
 #include "utilities.h"
-
-t_vec	normalize(t_vec vec)
-{
-	t_vec	normalized;
-	float	magnitude;
-
-	magnitude = length(vec);
-	normalized.x = vec.x / magnitude;
-	normalized.y = vec.y / magnitude;
-	normalized.z = vec.z / magnitude;
-	return (normalized);
-}
-
-t_vec	cross(t_vec a, t_vec b)
-{
-	t_vec	result;
-
-	result.x = (a.y * b.y) - (a.z * b.y);
-	result.y = (a.z * b.x) - (a.x * b.z);
-	result.z = (a.x * b.y) - (a.y * b.x);
-	return (result);
-}
 
 t_vec	add(t_vec a, t_vec b)
 {
@@ -64,5 +42,31 @@ t_vec	mult(t_vec a, float b)
 	result.x = a.x * b;
 	result.y = a.y * b;
 	result.z = a.z * b;
+	return (result);
+}
+
+t_vec	div_vec(t_vec a, float b)
+{
+	t_vec	result;
+
+	result.x = a.x / b;
+	result.y = a.y / b;
+	result.z = a.z / b;
+	return (result);
+}
+
+t_vec	mult_col(t_vec a, t_vec b)
+{
+	t_vec	result;
+	t_vec	norm_r;
+	t_vec	norm_a;
+	t_vec	norm_b;
+
+	norm_a = div_vec(a, 255);
+	norm_b = div_vec(b, 255);
+	norm_r.x = norm_a.x * norm_b.x;
+	norm_r.y = norm_a.y * norm_b.y;
+	norm_r.z = norm_a.z * norm_b.z;
+	result = mult(norm_r, 255);
 	return (result);
 }

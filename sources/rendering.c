@@ -6,7 +6,7 @@
 /*   By: ferre <ferre@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/03/10 20:18:41 by ferre         #+#    #+#                 */
-/*   Updated: 2025/05/12 22:18:43 by ferre         ########   odam.nl         */
+/*   Updated: 2025/05/13 16:25:37 by ferre         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,6 @@
 
 #include <stdio.h>
 
-int	color_to_int(t_vec color)
-{
-	return (255 << 24 | (int)color.x << 16 | (int)color.y << 8 | (int)color.z);
-}
-
 void	render_pixel(int x, int y, t_vec color, t_data *data)
 {
 	char	*dst;
@@ -32,7 +27,8 @@ void	render_pixel(int x, int y, t_vec color, t_data *data)
 	dst = data->mlx_data.image_data.address
 		+ (y * data->mlx_data.image_data.line + x
 			* (data->mlx_data.image_data.bpp / 8));
-	*(unsigned int *)dst = color_to_int(color);
+	*(unsigned int *)dst = (255 << 24 | (int)color.x << 16 | (int)color.y << 8
+			| (int)color.z);
 }
 
 int	render_image(t_data *data)
@@ -69,15 +65,12 @@ t_vec	trace_ray(t_ray ray, t_scene_data sd)
 			rd.shadow = in_shadow((t_ray){ray.position, rd.light_n,
 					ray.position, sd.light.source, distance(ray.position,
 						sd.light.source)}, sd);
-			rd.diff = clamp(dot(rd.hit.normal, rd.light_n) * rd.shadow,
-					sd.ambient.intensity, 1.0);
+			rd.diff = dot(rd.hit.normal, rd.light_n) * rd.shadow;
 			rd.reflect_n = sub(mult(rd.hit.normal, 2.0 * dot(rd.light_n,
 							rd.hit.normal)), rd.light_n);
 			rd.spec = pow(clamp(dot(mult(ray.direction, -1.0),
 							rd.reflect_n), 0.0, 1.0), 4.0);
-			rd.spec_c = mult((t_vec){255, 255, 255}, rd.spec);
-			return (clamp_vec(mult(add(rd.hit.color, rd.spec_c),
-						rd.diff), 0.0, 255.0));
+			return (calculate_light(rd, sd));
 		}
 		rd.closest = clamp(rd.hit.distance, sd.step, sd.camera.far);
 		ray.position = add(ray.position, mult(ray.direction, rd.closest));
@@ -100,4 +93,18 @@ float	in_shadow(t_ray ray, t_scene_data scene)
 		ray.position = add(ray.position, mult(ray.direction, closest));
 	}
 	return (1.0);
+}
+
+t_vec	calculate_light(t_ray_data rd, t_scene_data scene)
+{
+	t_vec	result;
+	t_vec	ambient;
+	t_vec	direct;
+	t_vec	specular;
+
+	ambient = mult(scene.ambient.color, scene.ambient.intensity);
+	direct = mult(mult(scene.light.color, scene.light.intensity), rd.diff);
+	specular = mult(direct, rd.spec);
+	result = clamp_vec(add(ambient, direct), 0, 255);
+	return (clamp_vec(add(mult_col(result, rd.hit.color), specular), 0, 255));
 }

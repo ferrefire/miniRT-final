@@ -6,7 +6,7 @@
 /*   By: ferre <ferre@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2025/03/10 20:20:55 by ferre         #+#    #+#                 */
-/*   Updated: 2025/05/12 22:18:50 by ferre         ########   odam.nl         */
+/*   Updated: 2025/05/13 16:14:27 by ferre         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,10 +38,10 @@ typedef struct s_ray_data
 	float	closest;
 }				t_ray_data;
 
-int		color_to_int(t_vec color);
 void	render_pixel(int x, int y, t_vec color, t_data *data);
 int		render_image(t_data *data);
 t_vec	trace_ray(t_ray ray, t_scene_data scene);
 float	in_shadow(t_ray ray, t_scene_data scene);
+t_vec	calculate_light(t_ray_data rd, t_scene_data scene);
 
 #endif
